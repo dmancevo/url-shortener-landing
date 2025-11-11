@@ -1,0 +1,635 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Documentation - URL Shortener API"
+  description="Complete documentation for setting up and using the self-hosted URL shortener"
+>
+  <main class="docs">
+    <div class="container">
+      <aside class="sidebar">
+        <nav class="docs-nav">
+          <h3>Documentation</h3>
+          <ul>
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#getting-license">Getting a License</a></li>
+            <li><a href="#configuration">Configuration</a></li>
+            <li><a href="#api-endpoints">API Endpoints</a></li>
+            <li><a href="#usage-examples">Usage Examples</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#click-tracking">Click Tracking</a></li>
+            <li><a href="#custom-deployment">Custom Deployment</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <article class="docs-content">
+        <h1>Documentation</h1>
+        <p class="lead">
+          Complete guide to deploying and using your self-hosted URL shortener with A/B testing capabilities.
+        </p>
+
+        <section id="quick-start">
+          <h2>Quick Start with Docker</h2>
+          <p>
+            The easiest way to run the URL shortener is using Docker. You'll need a valid license key to get started.
+          </p>
+
+          <div class="code-block">
+            <pre><code>docker run -d \
+  -e LICENSE_KEY=your-license-key \
+  -p 8080:3000 \
+  -v $(pwd)/data:/data \
+  ghcr.io/dmancevo/url-shortener:latest</code></pre>
+          </div>
+
+          <div class="info-box">
+            <strong>Note:</strong> The server requires a valid license key to run. See the section below on how to get your license.
+          </div>
+        </section>
+
+        <section id="getting-license">
+          <h2>Getting a License Key</h2>
+          <p>
+            To use the URL shortener, you need a valid license key. Visit
+            <a href="https://www.url-shortener-api.com">www.url-shortener-api.com</a> to purchase a license.
+            Once you have your license key, set it via the <code>LICENSE_KEY</code> environment variable.
+          </p>
+
+          <h3>Getting Your API Key</h3>
+          <p>
+            When the server starts, it automatically generates a unique API key and displays it in the logs:
+          </p>
+
+          <div class="code-block">
+            <pre><code># View the logs to get your API key
+docker logs &lt;container-id&gt;</code></pre>
+          </div>
+
+          <p>You'll see output like:</p>
+
+          <div class="code-block">
+            <pre><code>================================================================================
+================================================================================
+                         API KEY GENERATED
+================================================================================
+
+    AbCdEfGh1234567890XyZaBcDeFgHi
+
+    Include this key in the 'X-API-Key' header for all API requests.
+    Redirects (GET /:code) do not require authentication.
+================================================================================
+================================================================================</code></pre>
+          </div>
+
+          <div class="warning-box">
+            <strong>Important:</strong> Copy this API key immediately! You'll need it for all API requests (except redirects).
+          </div>
+        </section>
+
+        <section id="configuration">
+          <h2>Configuration</h2>
+          <p>Customize the server using environment variables:</p>
+
+          <div class="code-block">
+            <pre><code>docker run -d \
+  -e LICENSE_KEY=your-license-key \
+  -e HOST=0.0.0.0 \
+  -e PORT=3000 \
+  -e CACHE_CAPACITY=1000 \
+  -e PARTITION_COUNT=10 \
+  -e STORAGE_PATH=/data/urls.json \
+  -e CLICK_TRACKING_PATH=/data/clicks.jsonl \
+  -p 8080:3000 \
+  -v $(pwd)/data:/data \
+  ghcr.io/dmancevo/url-shortener:latest</code></pre>
+          </div>
+
+          <h3>Environment Variables</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Description</th>
+                <th>Default</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>LICENSE_KEY</code></td>
+                <td>License key (required)</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><code>HOST</code></td>
+                <td>Server host</td>
+                <td><code>0.0.0.0</code></td>
+              </tr>
+              <tr>
+                <td><code>PORT</code></td>
+                <td>Server port</td>
+                <td><code>3000</code></td>
+              </tr>
+              <tr>
+                <td><code>CACHE_CAPACITY</code></td>
+                <td>Max entries in LRU cache</td>
+                <td><code>1000</code></td>
+              </tr>
+              <tr>
+                <td><code>PARTITION_COUNT</code></td>
+                <td>Number of storage partitions</td>
+                <td><code>10</code></td>
+              </tr>
+              <tr>
+                <td><code>STORAGE_PATH</code></td>
+                <td>Path to JSON storage file</td>
+                <td><code>./data/urls.json</code></td>
+              </tr>
+              <tr>
+                <td><code>CLICK_TRACKING_PATH</code></td>
+                <td>Path to click tracking file (optional)</td>
+                <td>None</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="api-endpoints">
+          <h2>API Endpoints</h2>
+          <p>All endpoints except <code>GET /:code</code> require the <code>X-API-Key</code> header for authentication.</p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Auth Required</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/shorten</code></td>
+                <td>Yes</td>
+                <td>Create a short URL</td>
+              </tr>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/:code</code></td>
+                <td>No</td>
+                <td>Redirect to target URL</td>
+              </tr>
+              <tr>
+                <td><code>PUT</code></td>
+                <td><code>/:code</code></td>
+                <td>Yes</td>
+                <td>Update a short URL</td>
+              </tr>
+              <tr>
+                <td><code>DELETE</code></td>
+                <td><code>/:code</code></td>
+                <td>Yes</td>
+                <td>Delete a short URL</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/api/codes-by-url</code></td>
+                <td>Yes</td>
+                <td>Find short codes by URL</td>
+              </tr>
+              <tr>
+                <td><code>POST</code></td>
+                <td><code>/api/codes-by-tag</code></td>
+                <td>Yes</td>
+                <td>Find short codes by tag</td>
+              </tr>
+              <tr>
+                <td><code>GET</code></td>
+                <td><code>/api/stats</code></td>
+                <td>Yes</td>
+                <td>Get cache statistics</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="usage-examples">
+          <h2>Usage Examples</h2>
+          <p>Replace <code>YOUR_API_KEY_HERE</code> with the API key displayed when you started the server.</p>
+
+          <h3>Basic URL Shortening</h3>
+          <p>Create a short URL:</p>
+          <div class="code-block">
+            <pre><code>curl -X POST http://localhost:8080/shorten \
+  -H "X-API-Key: YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/very/long/url"}'</code></pre>
+          </div>
+
+          <p>Response:</p>
+          <div class="code-block">
+            <pre><code>{
+  "short_code": "abc12345",
+  "url": "https://example.com/very/long/url"
+}</code></pre>
+          </div>
+
+          <h3>URL with Tags</h3>
+          <p>Organize URLs with tags:</p>
+          <div class="code-block">
+            <pre><code>curl -X POST http://localhost:8080/shorten \
+  -H "X-API-Key: YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/landing-page",
+    "tag": "marketing-campaign"
+  }'</code></pre>
+          </div>
+
+          <h3>URL with Expiration</h3>
+          <p>Create temporary URLs that automatically expire:</p>
+          <div class="code-block">
+            <pre><code>curl -X POST http://localhost:8080/shorten \
+  -H "X-API-Key: YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com/temporary-sale",
+    "expires_in": "2h"
+  }'</code></pre>
+          </div>
+          <p>Expiration formats: <code>"5m"</code> (5 minutes), <code>"2h"</code> (2 hours), <code>"3d"</code> (3 days)</p>
+
+          <h3>A/B Testing</h3>
+          <p>Split traffic between multiple URLs:</p>
+          <div class="code-block">
+            <pre><code>curl -X POST http://localhost:8080/shorten \
+  -H "X-API-Key: YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": [
+      {"url": "https://example.com/variant-a", "weight": 0.5},
+      {"url": "https://example.com/variant-b", "weight": 0.5}
+    ]
+  }'</code></pre>
+          </div>
+          <div class="info-box">
+            <strong>Note:</strong> Weights must sum to 1.0. The same visitor (identified by IP address) will always see the same variant.
+          </div>
+
+          <h3>Find Short Codes by Tag</h3>
+          <div class="code-block">
+            <pre><code>curl -X POST http://localhost:8080/api/codes-by-tag \
+  -H "X-API-Key: YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"tag": "marketing-campaign"}'</code></pre>
+          </div>
+        </section>
+
+        <section id="features">
+          <h2>Features</h2>
+          <ul class="feature-list">
+            <li><strong>A/B Testing:</strong> Split traffic between multiple URLs with configurable weights</li>
+            <li><strong>Deterministic Routing:</strong> Same visitor always sees the same variant (based on IP hash)</li>
+            <li><strong>URL Expiration:</strong> Set automatic expiration times for temporary links</li>
+            <li><strong>Tag Support:</strong> Organize and categorize short URLs with optional tags</li>
+            <li><strong>Click Tracking (Optional):</strong> Privacy-conscious analytics with IP truncation</li>
+            <li><strong>High Performance:</strong> LRU cache with partitioned storage for millions of URLs</li>
+            <li><strong>API Key Authentication:</strong> Secure API endpoints with automatic key generation</li>
+          </ul>
+        </section>
+
+        <section id="click-tracking">
+          <h2>Click Tracking (Optional)</h2>
+          <p>To enable click tracking, add the <code>CLICK_TRACKING_PATH</code> environment variable:</p>
+          <div class="code-block">
+            <pre><code>docker run -d \
+  -e LICENSE_KEY=your-license-key \
+  -e CLICK_TRACKING_PATH=/data/clicks.jsonl \
+  -p 8080:3000 \
+  -v $(pwd)/data:/data \
+  ghcr.io/dmancevo/url-shortener:latest</code></pre>
+          </div>
+
+          <p>Click data is stored in JSONL format with privacy protections:</p>
+          <ul>
+            <li>IP truncation (last 2 octets removed for IPv4)</li>
+            <li>Timestamp</li>
+            <li>Browser and OS information</li>
+            <li>Device category</li>
+            <li>Short code accessed</li>
+          </ul>
+
+          <div class="warning-box">
+            <h4>GDPR Considerations</h4>
+            <p>
+              If you serve users in the EU/EEA and enable click tracking, GDPR may apply.
+              Even with IP truncation, the collected data may be considered personal data under GDPR.
+              Consider implementing:
+            </p>
+            <ul>
+              <li>A privacy policy disclosing what data is collected and why</li>
+              <li>A data retention policy</li>
+              <li>A legal basis for processing (legitimate interest or consent)</li>
+            </ul>
+            <p>
+              Click tracking is most appropriate for internal/corporate use, personal projects,
+              or when users are aware of the analytics.
+            </p>
+          </div>
+        </section>
+
+        <section id="custom-deployment">
+          <h2>Custom Deployment</h2>
+          <p>Create custom deployments by extending the base image:</p>
+          <div class="code-block">
+            <pre><code>FROM ghcr.io/dmancevo/url-shortener:latest
+
+# Set default environment variables
+ENV HOST=0.0.0.0
+ENV PORT=3000
+ENV CACHE_CAPACITY=2000
+ENV PARTITION_COUNT=20
+
+# Expose the port
+EXPOSE 3000</code></pre>
+          </div>
+
+          <p>Build and run:</p>
+          <div class="code-block">
+            <pre><code>docker build -t my-url-shortener .
+docker run -d \
+  -e LICENSE_KEY=your-license-key \
+  -p 8080:3000 \
+  -v $(pwd)/data:/data \
+  my-url-shortener</code></pre>
+          </div>
+        </section>
+
+        <div class="docs-footer">
+          <p>Need help? Visit our <a href="https://github.com/dmancevo/url-shortener">GitHub repository</a> or check the community forums.</p>
+        </div>
+      </article>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .docs {
+    padding: 2rem 0;
+  }
+
+  .docs .container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 3rem;
+    max-width: 1400px;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+  }
+
+  .docs-nav h3 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    color: var(--secondary);
+  }
+
+  .docs-nav ul {
+    list-style: none;
+  }
+
+  .docs-nav li {
+    margin-bottom: 0.5rem;
+  }
+
+  .docs-nav a {
+    color: var(--text-light);
+    display: block;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+  }
+
+  .docs-nav a:hover {
+    color: var(--primary);
+    background: var(--bg-alt);
+  }
+
+  .docs-content {
+    max-width: 900px;
+  }
+
+  .docs-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--secondary);
+  }
+
+  .lead {
+    font-size: 1.25rem;
+    color: var(--text-light);
+    margin-bottom: 3rem;
+  }
+
+  .docs-content section {
+    margin-bottom: 3rem;
+  }
+
+  .docs-content h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--secondary);
+    padding-top: 1rem;
+    border-top: 2px solid var(--border);
+  }
+
+  .docs-content h3 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    color: var(--secondary);
+  }
+
+  .docs-content h4 {
+    font-size: 1.25rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--secondary);
+  }
+
+  .docs-content p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  .docs-content ul:not(.feature-list) {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+  }
+
+  .docs-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+  }
+
+  .code-block {
+    background: var(--secondary);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+
+  .code-block pre {
+    margin: 0;
+  }
+
+  .code-block code {
+    color: #e2e8f0;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  code {
+    background: var(--bg-alt);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--primary);
+  }
+
+  .code-block code {
+    background: transparent;
+    padding: 0;
+    color: #e2e8f0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  thead {
+    background: var(--bg-alt);
+  }
+
+  th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--secondary);
+    border-bottom: 2px solid var(--border);
+  }
+
+  td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: var(--bg-alt);
+  }
+
+  .info-box {
+    background: #eff6ff;
+    border-left: 4px solid var(--primary);
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0.25rem;
+  }
+
+  .info-box strong {
+    color: var(--primary);
+  }
+
+  .warning-box {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0.25rem;
+  }
+
+  .warning-box strong {
+    color: #d97706;
+  }
+
+  .warning-box h4 {
+    color: #d97706;
+    margin-top: 0;
+  }
+
+  .feature-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .feature-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .feature-list li:last-child {
+    border-bottom: none;
+  }
+
+  .docs-footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border);
+    text-align: center;
+    color: var(--text-light);
+  }
+
+  @media (max-width: 768px) {
+    .docs .container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .sidebar {
+      position: static;
+      background: var(--bg-alt);
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .docs-content h1 {
+      font-size: 2rem;
+    }
+
+    .docs-content h2 {
+      font-size: 1.5rem;
+    }
+
+    .code-block {
+      padding: 1rem;
+    }
+
+    .code-block code {
+      font-size: 0.75rem;
+    }
+
+    table {
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.75rem 0.5rem;
+    }
+  }
+</style>
