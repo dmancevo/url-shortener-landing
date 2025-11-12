@@ -15,6 +15,14 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    <script is:inline>
+      // Initialize theme before page renders to prevent flash
+      (function() {
+        const theme = localStorage.getItem('theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
     <style is:global>
       :root {
         --primary: #3b82f6;
@@ -25,6 +33,32 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
         --bg: #ffffff;
         --bg-alt: #f8fafc;
         --border: #e2e8f0;
+      }
+
+      /* Dark mode colors */
+      :root[data-theme="dark"] {
+        --primary: #60a5fa;
+        --primary-dark: #3b82f6;
+        --secondary: #f1f5f9;
+        --text: #f1f5f9;
+        --text-light: #94a3b8;
+        --bg: #0f172a;
+        --bg-alt: #1e293b;
+        --border: #334155;
+      }
+
+      /* Auto dark mode based on system preference */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --primary: #60a5fa;
+          --primary-dark: #3b82f6;
+          --secondary: #f1f5f9;
+          --text: #f1f5f9;
+          --text-light: #94a3b8;
+          --bg: #0f172a;
+          --bg-alt: #1e293b;
+          --border: #334155;
+        }
       }
 
       * {
@@ -88,6 +122,26 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
         color: var(--primary);
       }
 
+      .theme-toggle {
+        background: none;
+        border: 2px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+      }
+
+      .theme-toggle:hover {
+        border-color: var(--primary);
+        transform: scale(1.05);
+      }
+
       footer {
         margin-top: 4rem;
         padding: 2rem 0;
@@ -99,6 +153,17 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
       @media (max-width: 768px) {
         nav ul {
           gap: 1rem;
+          font-size: 0.9rem;
+        }
+
+        nav .container {
+          gap: 1rem;
+        }
+
+        .theme-toggle {
+          width: 36px;
+          height: 36px;
+          font-size: 1rem;
         }
       }
     </style>
@@ -107,13 +172,46 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
     <nav>
       <div class="container">
         <a href="/" class="logo">URL Shortener API</a>
-        <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/docs">Documentation</a></li>
-          <li><a href="https://github.com/dmancevo/url-shortener" target="_blank">GitHub</a></li>
-        </ul>
+        <div style="display: flex; align-items: center; gap: 2rem;">
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/docs">Documentation</a></li>
+            <li><a href="https://github.com/dmancevo/url-shortener" target="_blank">GitHub</a></li>
+          </ul>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
       </div>
     </nav>
+
+    <script>
+      // Theme toggle functionality
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeIcon = themeToggle?.querySelector('.theme-icon');
+
+      function updateIcon(theme: string) {
+        if (themeIcon) {
+          themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+      }
+
+      // Set initial icon
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme) {
+        updateIcon(currentTheme);
+      }
+
+      // Handle toggle
+      themeToggle?.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const newTheme = current === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+      });
+    </script>
 
     <slot />
 
