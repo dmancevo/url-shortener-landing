@@ -16,11 +16,21 @@ import Layout from '../layouts/Layout.astro';
           <a href="https://github.com/dmancevo/url-shortener" class="btn btn-secondary" target="_blank">View on GitHub</a>
         </div>
         <div class="quick-start">
-          <pre><code>docker run -d \
+          <div class="terminal-header">
+            <div class="terminal-buttons">
+              <span class="terminal-button terminal-close"></span>
+              <span class="terminal-button terminal-minimize"></span>
+              <span class="terminal-button terminal-maximize"></span>
+            </div>
+            <div class="terminal-title">Terminal</div>
+          </div>
+          <div class="terminal-body">
+            <pre><code><span class="terminal-prompt">$</span> docker run -d \
   -e LICENSE_KEY=your-license-key \
   -p 8080:3000 \
   -v $(pwd)/data:/data \
   ghcr.io/dmancevo/url-shortener:latest</code></pre>
+          </div>
         </div>
       </div>
     </section>
@@ -245,22 +255,77 @@ import Layout from '../layouts/Layout.astro';
   .quick-start {
     max-width: 800px;
     margin: 0 auto;
-    background: #1e293b;
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: #1e1e1e;
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
   }
 
-  .quick-start pre {
+  .terminal-header {
+    background: #2d2d2d;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid #3d3d3d;
+  }
+
+  .terminal-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .terminal-close {
+    background: #ff5f56;
+  }
+
+  .terminal-minimize {
+    background: #ffbd2e;
+  }
+
+  .terminal-maximize {
+    background: #27c93f;
+  }
+
+  .terminal-title {
+    color: #8b8b8b;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: center;
+    flex: 1;
+    margin-right: 4rem;
+  }
+
+  .terminal-body {
+    padding: 1.5rem;
+    background: #1e1e1e;
+  }
+
+  .terminal-body pre {
     margin: 0;
     overflow-x: auto;
   }
 
-  .quick-start code {
-    color: #e2e8f0;
-    font-family: 'Monaco', 'Courier New', monospace;
-    font-size: 0.9rem;
-    line-height: 1.6;
+  .terminal-body code {
+    color: #d4d4d4;
+    font-family: 'Menlo', 'Monaco', 'SF Mono', 'Consolas', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    display: block;
+    text-align: left;
+  }
+
+  .terminal-prompt {
+    color: #27c93f;
+    font-weight: 600;
+    margin-right: 0.5rem;
   }
 
   .features {
@@ -483,8 +548,22 @@ import Layout from '../layouts/Layout.astro';
       align-items: center;
     }
 
-    .quick-start code {
+    .terminal-body {
+      padding: 1rem;
+    }
+
+    .terminal-body code {
       font-size: 0.75rem;
+      line-height: 1.6;
+    }
+
+    .terminal-header {
+      padding: 0.6rem 0.75rem;
+    }
+
+    .terminal-button {
+      width: 10px;
+      height: 10px;
     }
 
     .features h2,
