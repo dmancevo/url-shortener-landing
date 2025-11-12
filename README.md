@@ -5,12 +5,15 @@ Official landing page and documentation site for URL Shortener API - a self-host
 This Astro-based website provides:
 - Marketing landing page highlighting the self-hosted nature and key features
 - Comprehensive documentation with setup instructions and API examples
+- SEO-optimized blog with Content Collections
 - Modern, responsive design optimized for developers and teams
 
 ## Features
 
 - Built with [Astro](https://astro.build/) for fast, static site generation
 - Clean, professional design with responsive layout
+- SEO-optimized blog with automatic sitemap and RSS feed
+- Content Collections for type-safe blog posts
 - Comprehensive documentation with code examples
 - Easy to customize and extend
 
@@ -91,11 +94,18 @@ rsync -avz dist/ user@server:/var/www/html/
 /
 ├── public/           # Static assets (favicon, images)
 ├── src/
+│   ├── content/      # Content Collections
+│   │   ├── blog/     # Blog posts (Markdown files)
+│   │   └── config.ts # Content schema definitions
 │   ├── layouts/      # Page layouts
 │   │   └── Layout.astro
 │   └── pages/        # Site pages
-│       ├── index.astro    # Landing page
-│       └── docs.astro     # Documentation
+│       ├── blog/
+│       │   ├── [slug].astro  # Dynamic blog post pages
+│       │   └── index.astro   # Blog listing page
+│       ├── index.astro       # Landing page
+│       ├── _docs.astro       # Documentation (excluded from build)
+│       └── rss.xml.js        # RSS feed generator
 ├── astro.config.mjs  # Astro configuration
 ├── package.json
 └── tsconfig.json
@@ -122,6 +132,120 @@ export default defineConfig({
   site: 'https://url-shortener-api.com',
 });
 ```
+
+## Adding Blog Posts
+
+The site includes a fully SEO-optimized blog powered by Astro Content Collections.
+
+### Creating a New Blog Post
+
+1. Create a new Markdown file in `src/content/blog/` with a descriptive filename:
+   ```bash
+   src/content/blog/your-post-slug.md
+   ```
+
+2. Add frontmatter at the top of the file:
+   ```markdown
+   ---
+   title: "Your Blog Post Title"
+   description: "A concise description for SEO (recommended: 120-160 characters)"
+   pubDate: 2025-01-25
+   author: "URL Shortener Team"
+   tags: ["url-shortening", "analytics", "marketing"]
+   draft: false
+   ---
+
+   Your markdown content starts here...
+   ```
+
+3. Write your content using standard Markdown syntax
+
+4. Save the file - it will automatically appear in the blog listing at `/blog`
+
+### Frontmatter Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | string | ✓ | Post title (used in `<h1>` and meta tags) |
+| `description` | string | ✓ | SEO description (appears in search results) |
+| `pubDate` | date | ✓ | Publication date (YYYY-MM-DD format) |
+| `updatedDate` | date |  | Last updated date (shows "Updated on..." note) |
+| `author` | string |  | Author name (defaults to "URL Shortener Team") |
+| `tags` | array |  | Post tags/categories for organization |
+| `image` | object |  | Featured image: `{ url: "/path.jpg", alt: "Description" }` |
+| `draft` | boolean |  | Set to `true` to hide from production (defaults to `false`) |
+
+### Markdown Features
+
+The blog supports all standard Markdown features:
+
+- **Headings**: `## H2`, `### H3`, `#### H4`
+- **Lists**: Bulleted and numbered lists
+- **Links**: `[text](url)`
+- **Images**: `![alt text](/image.jpg)`
+- **Code blocks**: Use triple backticks with language
+- **Inline code**: Use single backticks
+- **Blockquotes**: Start lines with `>`
+
+### Example Post
+
+```markdown
+---
+title: "5 Ways to Optimize Your Short Links"
+description: "Learn proven strategies to increase click-through rates and maximize the impact of your shortened URLs."
+pubDate: 2025-01-25
+author: "URL Shortener Team"
+tags: ["best-practices", "optimization", "analytics"]
+draft: false
+---
+
+Short links are powerful, but optimizing them can dramatically improve your results...
+
+## 1. Use Custom Slugs
+
+Instead of random codes like `abc123`, create memorable slugs:
+- `yourbrand.com/summer-sale`
+- `yourbrand.com/free-trial`
+
+## 2. Test Your Destinations
+
+Use A/B testing to compare landing pages and find what converts best.
+```
+
+### SEO Features
+
+Every blog post automatically includes:
+
+- **JSON-LD structured data** for rich search results
+- **Open Graph tags** for social media sharing
+- **Twitter Card tags** for Twitter/X previews
+- **Canonical URLs** to avoid duplicate content
+- **Reading time calculation**
+- **Automatic sitemap generation**
+- **RSS feed** at `/rss.xml`
+
+### Testing Locally
+
+After creating a post, run the dev server to preview:
+
+```bash
+npm run dev
+```
+
+Visit:
+- `http://localhost:4321/blog` - Blog listing
+- `http://localhost:4321/blog/your-post-slug` - Individual post
+
+### Publishing
+
+1. Ensure `draft: false` in the frontmatter
+2. Build the site: `npm run build`
+3. Deploy the `dist/` folder to your hosting provider
+
+The blog post will automatically appear in:
+- Blog listing page
+- RSS feed (`/rss.xml`)
+- Sitemap (`/sitemap-index.xml`)
 
 ## License
 

@@ -1,0 +1,486 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
+}
+
+type Props = CollectionEntry<'blog'>;
+
+const post = Astro.props;
+const { Content } = await post.render();
+
+// Calculate reading time (rough estimate: 200 words per minute)
+const wordsPerMinute = 200;
+const textContent = post.body;
+const wordCount = textContent.split(/\s+/g).length;
+const readingTime = Math.ceil(wordCount / wordsPerMinute);
+
+// Format dates
+const publishDate = post.data.pubDate.toISOString();
+const updateDate = post.data.updatedDate?.toISOString() || publishDate;
+
+// Build canonical URL
+const canonicalURL = new URL(`/blog/${post.slug}`, Astro.site);
+
+// Build image URL
+const imageURL = post.data.image?.url
+  ? new URL(post.data.image.url, Astro.site).toString()
+  : new URL('/og-image.png', Astro.site).toString();
+
+// JSON-LD structured data for SEO
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  image: imageURL,
+  datePublished: publishDate,
+  dateModified: updateDate,
+  author: {
+    '@type': 'Organization',
+    name: post.data.author,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'URL Shortener API',
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/favicon.svg', Astro.site).toString(),
+    },
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': canonicalURL.toString(),
+  },
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Primary Meta Tags -->
+    <title>{post.data.title} - URL Shortener API</title>
+    <meta name="title" content={post.data.title} />
+    <meta name="description" content={post.data.description} />
+    <meta name="author" content={post.data.author} />
+    {post.data.tags && <meta name="keywords" content={post.data.tags.join(', ')} />}
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={post.data.title} />
+    <meta property="og:description" content={post.data.description} />
+    <meta property="og:image" content={imageURL} />
+    <meta property="article:published_time" content={publishDate} />
+    <meta property="article:modified_time" content={updateDate} />
+    <meta property="article:author" content={post.data.author} />
+    {post.data.tags && post.data.tags.map((tag) => (
+      <meta property="article:tag" content={tag} />
+    ))}
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={post.data.title} />
+    <meta property="twitter:description" content={post.data.description} />
+    <meta property="twitter:image" content={imageURL} />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+    <!-- Theme Script -->
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+
+    <style is:global>
+      :root {
+        --primary: #3b82f6;
+        --primary-dark: #2563eb;
+        --secondary: #1e293b;
+        --text: #1e293b;
+        --text-light: #64748b;
+        --bg: #ffffff;
+        --bg-alt: #f8fafc;
+        --border: #e2e8f0;
+      }
+
+      :root[data-theme="dark"] {
+        --primary: #60a5fa;
+        --primary-dark: #3b82f6;
+        --secondary: #f1f5f9;
+        --text: #f1f5f9;
+        --text-light: #94a3b8;
+        --bg: #0f172a;
+        --bg-alt: #1e293b;
+        --border: #334155;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --primary: #60a5fa;
+          --primary-dark: #3b82f6;
+          --secondary: #f1f5f9;
+          --text: #f1f5f9;
+          --text-light: #94a3b8;
+          --bg: #0f172a;
+          --bg-alt: #1e293b;
+          --border: #334155;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--text);
+        background: var(--bg);
+      }
+
+      a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--primary-dark);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      nav {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+      }
+
+      nav .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav .logo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      nav ul {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      nav a {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      nav a:hover {
+        color: var(--primary);
+      }
+
+      .theme-toggle {
+        background: none;
+        border: 2px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+      }
+
+      .theme-toggle:hover {
+        border-color: var(--primary);
+        transform: scale(1.05);
+      }
+
+      footer {
+        margin-top: 4rem;
+        padding: 2rem 0;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--text-light);
+      }
+
+      @media (max-width: 768px) {
+        nav ul {
+          gap: 1rem;
+          font-size: 0.9rem;
+        }
+
+        nav .container {
+          gap: 1rem;
+        }
+
+        .theme-toggle {
+          width: 36px;
+          height: 36px;
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="container">
+        <a href="/" class="logo">URL Shortener API</a>
+        <div style="display: flex; align-items: center; gap: 2rem;">
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/blog">Blog</a></li>
+            <li><a href="https://github.com/dmancevo/url-shortener/pkgs/container/url-shortener" target="_blank">GitHub</a></li>
+          </ul>
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <script>
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeIcon = themeToggle?.querySelector('.theme-icon');
+
+      function updateIcon(theme: string) {
+        if (themeIcon) {
+          themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+      }
+
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme) {
+        updateIcon(currentTheme);
+      }
+
+      themeToggle?.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const newTheme = current === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+      });
+    </script>
+
+    <main class="container" style="padding: 4rem 1.5rem;">
+      <article style="max-width: 800px; margin: 0 auto;">
+        <!-- Breadcrumb -->
+        <nav aria-label="Breadcrumb" style="margin-bottom: 2rem;">
+          <ol style="display: flex; gap: 0.5rem; list-style: none; font-size: 0.875rem; color: var(--text-light);">
+            <li><a href="/">Home</a></li>
+            <li>→</li>
+            <li><a href="/blog">Blog</a></li>
+            <li>→</li>
+            <li style="color: var(--text);">{post.data.title}</li>
+          </ol>
+        </nav>
+
+        <!-- Article Header -->
+        <header style="margin-bottom: 3rem;">
+          <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text); line-height: 1.2;">
+            {post.data.title}
+          </h1>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; color: var(--text-light); font-size: 0.875rem;">
+            <time datetime={publishDate}>
+              {post.data.pubDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </time>
+            <span>•</span>
+            <span>{post.data.author}</span>
+            <span>•</span>
+            <span>{readingTime} min read</span>
+          </div>
+
+          {post.data.updatedDate && (
+            <div style="font-size: 0.875rem; color: var(--text-light); font-style: italic;">
+              Updated on {post.data.updatedDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </div>
+          )}
+
+          {post.data.tags && post.data.tags.length > 0 && (
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+              {post.data.tags.map((tag) => (
+                <span style="background: var(--bg-alt); padding: 0.25rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; color: var(--text-light);">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </header>
+
+        <!-- Article Content -->
+        <div class="prose">
+          <Content />
+        </div>
+
+        <!-- Back to Blog -->
+        <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+          <a href="/blog" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 500;">
+            ← Back to Blog
+          </a>
+        </div>
+      </article>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p>&copy; 2025 URL Shortener API. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <style>
+      .prose {
+        font-size: 1.125rem;
+        line-height: 1.75;
+        color: var(--text);
+      }
+
+      .prose :global(h2) {
+        font-size: 1.875rem;
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .prose :global(h3) {
+        font-size: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .prose :global(h4) {
+        font-size: 1.25rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .prose :global(p) {
+        margin-bottom: 1.5rem;
+      }
+
+      .prose :global(ul),
+      .prose :global(ol) {
+        margin-bottom: 1.5rem;
+        padding-left: 2rem;
+      }
+
+      .prose :global(li) {
+        margin-bottom: 0.5rem;
+      }
+
+      .prose :global(code) {
+        background: var(--bg-alt);
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.9em;
+        font-family: 'Courier New', monospace;
+      }
+
+      .prose :global(pre) {
+        background: var(--bg-alt);
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border);
+      }
+
+      .prose :global(pre code) {
+        background: none;
+        padding: 0;
+      }
+
+      .prose :global(blockquote) {
+        border-left: 4px solid var(--primary);
+        padding-left: 1.5rem;
+        margin: 1.5rem 0;
+        font-style: italic;
+        color: var(--text-light);
+      }
+
+      .prose :global(a) {
+        color: var(--primary);
+        text-decoration: underline;
+      }
+
+      .prose :global(a:hover) {
+        color: var(--primary-dark);
+      }
+
+      .prose :global(img) {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+      }
+
+      .prose :global(hr) {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 2rem 0;
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2rem !important;
+        }
+
+        .prose {
+          font-size: 1rem;
+        }
+
+        .prose :global(h2) {
+          font-size: 1.5rem;
+        }
+
+        .prose :global(h3) {
+          font-size: 1.25rem;
+        }
+      }
+    </style>
+  </body>
+</html>
