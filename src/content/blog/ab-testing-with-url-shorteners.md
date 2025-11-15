@@ -50,22 +50,42 @@ Here's a basic workflow:
    - Keep changes focused (test one element at a time)
 
 2. **Configure the Short URL**
-   ```bash
-   POST /api/links
-   {
-     "slug": "promo2025",
-     "destinations": [
-       {
-         "url": "https://example.com/landing-v1",
-         "weight": 50
-       },
-       {
-         "url": "https://example.com/landing-v2",
-         "weight": 50
-       }
-     ]
-   }
-   ```
+
+<div class="quick-start">
+<div class="terminal-header">
+<div class="terminal-buttons">
+<span class="terminal-button terminal-close"></span>
+<span class="terminal-button terminal-minimize"></span>
+<span class="terminal-button terminal-maximize"></span>
+</div>
+<div class="terminal-title">Terminal</div>
+<button class="copy-button" data-copy-target="ab-test-curl" aria-label="Copy code">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 4.5V2.5C5.5 1.94772 5.94772 1.5 6.5 1.5H13.5C14.0523 1.5 14.5 1.94772 14.5 2.5V9.5C14.5 10.0523 14.0523 10.5 13.5 10.5H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1.5" y="5.5" width="8" height="9" rx="1" stroke="currentColor" stroke-width="1.5"/>
+</svg>
+<span class="copy-text">Copy</span>
+</button>
+</div>
+<div class="terminal-body">
+<pre><code id="ab-test-curl"><span class="terminal-prompt">$</span> curl -X POST https://your-domain.com/api/links \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slug": "promo2025",
+    "destinations": [
+      {
+        "url": "https://example.com/landing-v1",
+        "weight": 50
+      },
+      {
+        "url": "https://example.com/landing-v2",
+        "weight": 50
+      }
+    ]
+  }'</code></pre>
+</div>
+</div>
 
 3. **Share and Monitor**
    - Use the short URL in your campaigns

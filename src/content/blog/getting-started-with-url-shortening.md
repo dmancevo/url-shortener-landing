@@ -29,12 +29,30 @@ Most URL shortening services charge based on the number of links or clicks. With
 
 Getting started is straightforward with Docker:
 
-```bash
-docker run -d \
-  -p 8080:8080 \
-  -v /path/to/data:/data \
-  ghcr.io/dmancevo/url-shortener:latest
-```
+<div class="quick-start">
+<div class="terminal-header">
+<div class="terminal-buttons">
+<span class="terminal-button terminal-close"></span>
+<span class="terminal-button terminal-minimize"></span>
+<span class="terminal-button terminal-maximize"></span>
+</div>
+<div class="terminal-title">Terminal</div>
+<button class="copy-button" data-copy-target="docker-setup" aria-label="Copy code">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.5 4.5V2.5C5.5 1.94772 5.94772 1.5 6.5 1.5H13.5C14.0523 1.5 14.5 1.94772 14.5 2.5V9.5C14.5 10.0523 14.0523 10.5 13.5 10.5H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1.5" y="5.5" width="8" height="9" rx="1" stroke="currentColor" stroke-width="1.5"/>
+</svg>
+<span class="copy-text">Copy</span>
+</button>
+</div>
+<div class="terminal-body">
+<pre><code id="docker-setup"><span class="terminal-prompt">$</span> docker run -d \
+  -e LICENSE_KEY=your-license-key \
+  -p 8080:3000 \
+  -v $(pwd)/data:/data \
+  ghcr.io/dmancevo/url-shortener:latest</code></pre>
+</div>
+</div>
 
 That's it! Your URL shortener is now running and ready to create links.
 
@@ -62,8 +80,7 @@ Self-hosting your URL shortener is a powerful way to take control of your links,
 ## Additional Resources
 
 - [URL-Shortener](https://github.com/dmancevo/url-shortener/pkgs/container/url-shortener)
-- API Documentation (coming soon)
 
 ---
 
-Have questions about setting up your self-hosted URL shortener? Drop us a message on GitHub!
+Have questions about setting up your self-hosted URL shortener? Check this blog for updates!
