@@ -79,7 +79,7 @@ Self-hosting your URL shortener is a powerful way to take control of your links,
 
 ## Additional Resources
 
-- [URL-Shortener](https://github.com/dmancevo/url-shortener/pkgs/container/url-shortener)
+- [URL-Shortener](https://github.com/dmancevo/url-shortener-api)
 
 ---
 
