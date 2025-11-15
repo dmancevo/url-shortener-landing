@@ -637,6 +637,7 @@ const jsonLd = {
         copyButtons.forEach((copyButton) => {
           copyButton.addEventListener('click', async () => {
             const targetId = copyButton.getAttribute('data-copy-target');
+            if (!targetId) return;
             const codeElement = document.getElementById(targetId);
             const copyText = copyButton.querySelector('.copy-text');
 
