@@ -71,14 +71,71 @@ The production preview will be available at `http://localhost:4321`
 
 ### Deployment
 
-The `dist/` directory contains all static files ready to deploy. You can deploy to:
+This project is configured for automatic deployment to GitHub Pages with a custom domain.
+
+#### Automated GitHub Pages Deployment
+
+The repository includes a GitHub Actions workflow that automatically builds and deploys the site whenever changes are merged to the `main` branch.
+
+**Setup Steps:**
+
+1. **Enable GitHub Pages in Your Repository**
+   - Go to your repository on GitHub
+   - Click **Settings** → **Pages** (left sidebar)
+   - Under **Source**, select **GitHub Actions**
+   - Click **Save**
+
+2. **Configure DNS for Your Custom Domain**
+
+   Add these DNS records at your domain registrar (e.g., Namecheap, GoDaddy, Cloudflare):
+
+   ```
+   Type    Name    Value
+   ────────────────────────────────────────────────────
+   A       www     185.199.108.153
+   A       www     185.199.109.153
+   A       www     185.199.110.153
+   A       www     185.199.111.153
+   ```
+
+   **Optional** - Redirect apex domain (url-shortener-api.com → www.url-shortener-api.com):
+   ```
+   Type     Name    Value
+   ───────────────────────────────────────────
+   CNAME    @       www.url-shortener-api.com
+   ```
+   *Or use A records pointing to the same IPs above*
+
+3. **Add Custom Domain to GitHub Pages**
+   - In **Settings** → **Pages**
+   - Under **Custom domain**, enter: `www.url-shortener-api.com`
+   - Click **Save**
+   - Wait for DNS check to complete (~5 minutes)
+   - Check **Enforce HTTPS** once available
+
+4. **Deploy**
+
+   Simply push or merge changes to the `main` branch:
+   ```bash
+   git push origin main
+   ```
+
+   The GitHub Actions workflow will automatically:
+   - Build the site with `npm run build`
+   - Deploy to GitHub Pages
+   - Make the site available at `https://www.url-shortener-api.com`
+
+   Monitor deployment progress in the **Actions** tab of your repository.
+
+#### Alternative Deployment Options
+
+You can also deploy to other platforms:
 
 - **Netlify**: Drag and drop the `dist/` folder or connect your Git repository
 - **Vercel**: Import your repository or deploy via CLI
-- **GitHub Pages**: Push the `dist/` folder to the `gh-pages` branch
 - **Any static hosting service**: Upload the contents of `dist/`
 
-Example deployment to a static server:
+Example manual deployment to a static server:
 
 ```bash
 # Build the site
