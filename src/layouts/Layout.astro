@@ -105,6 +105,14 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
         font-size: 1.25rem;
         font-weight: 700;
         color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      nav .logo img {
+        height: 32px;
+        width: auto;
       }
 
       nav ul {
@@ -171,7 +179,10 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
   <body>
     <nav>
       <div class="container">
-        <a href="/" class="logo">URL Shortener API</a>
+        <a href="/" class="logo">
+          <img src="/url-shortener-api-logo.svg" alt="URL Shortener API Logo" />
+          <span>URL Shortener API</span>
+        </a>
         <div style="display: flex; align-items: center; gap: 2rem;">
           <ul>
             <li><a href="/">Home</a></li>
