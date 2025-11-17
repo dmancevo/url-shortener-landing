@@ -161,7 +161,7 @@ import Layout from '../layouts/Layout.astro';
         <div class="pricing-grid">
           <div class="pricing-card">
             <div class="pricing-header">
-              <h3>1 Year License</h3>
+              <h3>1 Year License*</h3>
               <div class="price">
                 <span class="currency">€</span>
                 <span class="amount">49.99</span>
@@ -181,7 +181,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="pricing-card pricing-card-featured">
             <div class="badge">Best Value</div>
             <div class="pricing-header">
-              <h3>5 Year License</h3>
+              <h3>5 Year License**</h3>
               <div class="price">
                 <span class="currency">€</span>
                 <span class="amount">99.99</span>
@@ -198,6 +198,10 @@ import Layout from '../layouts/Layout.astro';
             </ul>
             <a href="https://url-shortener-api.lemonsqueezy.com/buy/6b40032e-b3e4-4993-9902-dca718e3e0dd" class="btn btn-primary btn-block" target="_blank" rel="noopener noreferrer">Get Started</a>
           </div>
+        </div>
+        <div class="pricing-notes">
+          <p class="note">* The 1 year license is subject to a maximum of 10 activations.</p>
+          <p class="note">** The 5 year license is subject to a maximum of 20 activations.</p>
         </div>
       </div>
     </section>
@@ -584,6 +588,20 @@ import Layout from '../layouts/Layout.astro';
   .btn-block {
     width: 100%;
     text-align: center;
+  }
+
+  .pricing-notes {
+    max-width: 900px;
+    margin: 2rem auto 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .pricing-notes .note {
+    color: var(--text-light);
+    font-size: 0.875rem;
+    margin: 0.5rem 0;
+    text-align: left;
   }
 
   @media (max-width: 768px) {
