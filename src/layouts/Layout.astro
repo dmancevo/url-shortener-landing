@@ -115,6 +115,34 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
         width: auto;
       }
 
+      /* Logo theme switching */
+      nav .logo .logo-light {
+        display: block;
+      }
+
+      nav .logo .logo-dark {
+        display: none;
+      }
+
+      :root[data-theme="dark"] nav .logo .logo-light {
+        display: none;
+      }
+
+      :root[data-theme="dark"] nav .logo .logo-dark {
+        display: block;
+      }
+
+      /* Auto dark mode based on system preference */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) nav .logo .logo-light {
+          display: none;
+        }
+
+        :root:not([data-theme="light"]) nav .logo .logo-dark {
+          display: block;
+        }
+      }
+
       nav ul {
         display: flex;
         gap: 2rem;
@@ -190,7 +218,8 @@ const { title, description = "Self-hosted URL shortener with A/B testing capabil
     <nav>
       <div class="container">
         <a href="/" class="logo">
-          <img src="/url-shortener-api-logo.svg" alt="URL Shortener API Logo" />
+          <img src="/url-shortener-api-logo.svg" alt="URL Shortener API Logo" class="logo-light" />
+          <img src="/url-shortener-api-logo-dark.svg" alt="URL Shortener API Logo" class="logo-dark" />
           <span>URL Shortener API</span>
         </a>
         <div style="display: flex; align-items: center; gap: 2rem;">
